@@ -1,0 +1,16 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+C:/Users/phaz/CLionProjects/NVWorldEdit/main.c
+windows.h
+-
+GL/gl.h
+-
+GL/glcorearb.h
+-
+
