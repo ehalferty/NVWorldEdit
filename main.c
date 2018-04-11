@@ -6,7 +6,10 @@
 #define WINDOW_TITLE "NVWorldEdit v0.0.1subalpha"
 #define WINDOW_STYLE WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN
 
-#define FILE_EXIT 100
+#define FILE_OPEN_MASTER 100
+#define FILE_NEW_MOD 101
+#define FILE_OPEN_MOD 102
+#define FILE_EXIT 150
 
 BOOL done = FALSE;
 HWND window = NULL;
@@ -19,12 +22,18 @@ LONG WINAPI WindowMessageHandler(HWND window, UINT message, WPARAM wParam, LPARA
         case WM_CREATE:
             menubar = CreateMenu();
             fileMenu = CreateMenu();
-            AppendMenu(fileMenu, MF_STRING, FILE_EXIT, "E&xit");
+            AppendMenu(fileMenu, MF_STRING, FILE_OPEN_MASTER, "Open &Master...\tCtrl+M");
+            AppendMenu(fileMenu, MF_STRING, FILE_NEW_MOD, "&New Mod...\tCtrl+N");
+            AppendMenu(fileMenu, MF_STRING, FILE_OPEN_MOD, "&Open Mod...\tCtrl+O");
+            AppendMenu(fileMenu, MF_STRING, FILE_EXIT, "E&xit\tCtrl-Q");
             AppendMenu(menubar, MF_POPUP, (UINT_PTR)fileMenu, "&File");
             SetMenu(window, menubar);
             break;
         case WM_COMMAND:
             switch (LOWORD(wParam)) {
+                case FILE_OPEN_MASTER:
+                    PostQuitMessage(0);
+                    break;
                 case FILE_EXIT:
                     PostQuitMessage(0);
                     break;
@@ -45,6 +54,9 @@ LONG WINAPI WindowMessageHandler(HWND window, UINT message, WPARAM wParam, LPARA
 }
 
 int WINAPI WinMain(HINSTANCE instance, HINSTANCE previousInstance, LPTSTR commandLine, int commandShow) {
+    ACCEL accel[] = { FCONTROL | FVIRTKEY, 'Q', FILE_EXIT };
+    HACCEL hAccel = CreateAcceleratorTable(accel, 1);
+
     MSG message;
     WNDCLASS windowClass;
     windowClass.style = CS_OWNDC;
@@ -60,14 +72,19 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE previousInstance, LPTSTR comman
     RegisterClass(&windowClass);
     window = CreateWindow(CLASS_NAME, WINDOW_TITLE, WINDOW_STYLE, 0, 0, 640, 480, NULL, NULL, instance, NULL);
     ShowWindow(window, commandShow);
+
     while (!done && message.message != WM_QUIT) {
         if (PeekMessage(&message, 0, 0, 0, PM_REMOVE)) {
-            TranslateMessage(&message);
-            DispatchMessage(&message);
+            if (!TranslateAccelerator(window, hAccel, &message)) {
+                TranslateMessage(&message);
+                DispatchMessage(&message);
+            }
         } else {
             Sleep(50);
         }
     }
+
+
     return (int)message.wParam;
 }
 
