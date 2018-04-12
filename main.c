@@ -4,17 +4,81 @@
 
 #define CLASS_NAME "NVWorldEdit"
 #define WINDOW_TITLE "NVWorldEdit v0.0.1subalpha"
-#define WINDOW_STYLE WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN
+#define WINDOW_STYLE (WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN)
 
 #define FILE_OPEN_MASTER 100
 #define FILE_NEW_MOD 101
 #define FILE_OPEN_MOD 102
+#define FILE_SAVE_MOD 103
 #define FILE_EXIT 150
+
+#define ACCELERATORS_TABLE_LENGTH 5
+#define ACCELERATORS_TABLE {\
+    { (UINT)FCONTROL | (UINT)FVIRTKEY, 'M', FILE_OPEN_MASTER },\
+    { (UINT)FCONTROL | (UINT)FVIRTKEY, 'N', FILE_NEW_MOD },\
+    { (UINT)FCONTROL | (UINT)FVIRTKEY, 'O', FILE_OPEN_MOD },\
+    { (UINT)FCONTROL | (UINT)FVIRTKEY, 'S', FILE_SAVE_MOD },\
+    { (UINT)FCONTROL | (UINT)FVIRTKEY, 'Q', FILE_EXIT }\
+}
+
+struct RecordNodeMetadata {
+    // Node type. 0 = regular, 1 = group, 2 = sub-record
+    CHAR nodeType;
+    // Where in the file was it located when parsed?
+    UINT32 offset;
+    // Has this been changed since reading from disk?
+    BOOL dirty;
+    // If it has a parent, cache a pointer to it here.
+    struct Record *parent;
+};
+
+struct RecordHeader {
+    UINT8 type[4];
+    UINT32 dataSize;
+    UINT32 flags;
+    UINT32 formID;
+    UINT32 versionControlInfo;
+};
+
+struct GroupHeader {
+    UINT8 type[4];
+    UINT32 groupSize;
+    UINT8 label[4];
+    INT32 groupType;
+    UINT32 stamp;
+};
+
+struct SubRecordHeader {
+    UINT8 subType[4];
+    UINT16 dataSize;
+};
+
+struct RecordNode {
+    struct RecordNodeMetadata recordNodeMetadata;
+    struct RecordHeader recordHeader;
+    struct GroupHeader groupHeader;
+    struct SubRecordHeader subRecordHeader;
+    UINT8 *data;
+    UINT8 *uncompressedData;
+    struct RecordNode *subRecords;
+    struct RecordNode *next;
+    struct RecordNode *head;
+    struct RecordNode *tail;
+};
 
 BOOL done = FALSE;
 HWND window = NULL;
 HMENU menubar = NULL;
 HMENU fileMenu = NULL;
+HACCEL accelerators = NULL;
+MSG message = {};
+WNDCLASS windowClass = {};
+OPENFILENAME openFileName;
+UINT8 fileName[MAX_PATH] = "";
+UINT8 *masterFileContents = NULL;
+struct Record *masterFileRecords = NULL;
+UINT8 *modFileContents = NULL;
+struct Record *modFileRecords = NULL;
 
 LONG WINAPI WindowMessageHandler(HWND window, UINT message, WPARAM wParam, LPARAM lParam) {
     static PAINTSTRUCT paintStruct;
@@ -23,8 +87,11 @@ LONG WINAPI WindowMessageHandler(HWND window, UINT message, WPARAM wParam, LPARA
             menubar = CreateMenu();
             fileMenu = CreateMenu();
             AppendMenu(fileMenu, MF_STRING, FILE_OPEN_MASTER, "Open &Master...\tCtrl+M");
-            AppendMenu(fileMenu, MF_STRING, FILE_NEW_MOD, "&New Mod...\tCtrl+N");
-            AppendMenu(fileMenu, MF_STRING, FILE_OPEN_MOD, "&Open Mod...\tCtrl+O");
+            AppendMenu(fileMenu, MF_STRING | MF_GRAYED, FILE_NEW_MOD, "&New Mod...\tCtrl+N");
+            AppendMenu(fileMenu, MF_STRING | MF_GRAYED, FILE_OPEN_MOD, "&Open Mod...\tCtrl+O");
+            AppendMenu(fileMenu, MF_SEPARATOR, 0, "-");
+            AppendMenu(fileMenu, MF_STRING | MF_GRAYED, FILE_SAVE_MOD, "&Save Mod...\tCtrl+S");
+            AppendMenu(fileMenu, MF_SEPARATOR, 0, "-");
             AppendMenu(fileMenu, MF_STRING, FILE_EXIT, "E&xit\tCtrl-Q");
             AppendMenu(menubar, MF_POPUP, (UINT_PTR)fileMenu, "&File");
             SetMenu(window, menubar);
@@ -32,7 +99,91 @@ LONG WINAPI WindowMessageHandler(HWND window, UINT message, WPARAM wParam, LPARA
         case WM_COMMAND:
             switch (LOWORD(wParam)) {
                 case FILE_OPEN_MASTER:
-                    PostQuitMessage(0);
+                    // TODO: Guess where NV is https://gamedev.stackexchange.com/questions/124100/is-there-a-reliable-and-fast-way-of-getting-a-list-of-all-installed-games-on-a-w
+                    // TODO: Expand this to a custom modal dialog which has you find a folder and then lists all ESMs
+                    // TODO:  and stores stuff in registry.
+                    ZeroMemory(&fileName, sizeof(fileName));
+                    ZeroMemory(&openFileName, sizeof(openFileName));
+                    openFileName.lStructSize = sizeof(openFileName);
+                    openFileName.hwndOwner = window;
+                    openFileName.lpstrFilter = "ESM Files (*.esm)\0*.esm\0All Files (*.*)\0*.*\0";
+                    openFileName.lpstrFile = (LPSTR)fileName;
+                    openFileName.nMaxFile = MAX_PATH;
+                    openFileName.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST;
+                    openFileName.lpstrDefExt = "esm";
+                    int getFileOpenNameResult = GetOpenFileName(&openFileName);
+                    if (getFileOpenNameResult) {
+                        HANDLE fileHandle = CreateFile(openFileName.lpstrFile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+                        LARGE_INTEGER fileSizeInBytes;
+                        BOOL getFileSizeResult = GetFileSizeEx(fileHandle, &fileSizeInBytes);
+                        masterFileContents = HeapAlloc(GetProcessHeap(), 0, (size_t)fileSizeInBytes.QuadPart);
+                        DWORD numberOfBytesActuallyRead = 0;
+                        BOOL readFileResult = ReadFile(fileHandle, masterFileContents, (size_t)fileSizeInBytes.QuadPart, &numberOfBytesActuallyRead, NULL);
+                        // TODO: Verify that file starts with the right stuff... 'TES4'... 'HEDR'... 'GRUP'... etc. etc.
+                        // Locate all top-level records
+                        // Find the first GRUP
+                        UINT64 location = 0;
+                        while (!(masterFileContents[location + 0] == 'G' &&
+                                masterFileContents[location + 1] == 'R' &&
+                                masterFileContents[location + 2] == 'U' &&
+                                masterFileContents[location + 3] == 'P')) { location++; }
+                        // TODO: Handle GRUP not found
+                        while (location < fileSizeInBytes.QuadPart) {
+                            // Is there a GRUP?
+                            if (masterFileContents[location + 0] == 'G' &&
+                            masterFileContents[location + 1] == 'R' &&
+                            masterFileContents[location + 2] == 'U' &&
+                            masterFileContents[location + 3] == 'P') {
+                                CHAR thisGrupBuffer[1024];
+                                for (int i = 0; i < 1024; i++) {
+                                    thisGrupBuffer[i] = masterFileContents[location + i];
+                                }
+                                // Read in size.
+                                UINT64 size = masterFileContents[location + 4] +
+                                              (masterFileContents[location + 5] << 8) +
+                                              (masterFileContents[location + 6] << 16) +
+                                              (masterFileContents[location + 7] << 24);
+                                UINT64 nextGrup = location + size;
+                                CHAR nextGrupBuffer[1024];
+                                for (int i = 0; i < 1024; i++) {
+                                    nextGrupBuffer[i] = masterFileContents[nextGrup + i];
+                                }
+                                int jhsdjkfhdjkh = 2343;
+                                location = nextGrup;
+                            } else {
+                                // Unknown top-level data!
+                                int sdfdfkjkdf = 2343;
+                            }
+                        }
+                        int asdfasd = 23423;
+
+
+//                        for (int i = 0; i < (fileSizeInBytes.QuadPart / 1024); i++) {
+//                            CHAR buffer[1024];
+////                            CopyMemory(fileContents + i * 1024, &buffer, 1024);
+//                        }
+//                        CHAR masterFileContents[16*1024*1024];
+//                        ZeroMemory(&masterFileContents, sizeof(masterFileContents));
+//                        DWORD numberOfBytesActuallyRead = 0;
+//                        BOOL readFileResult = ReadFile(fileHandle, &masterFileContents, 16*1024*1024, &numberOfBytesActuallyRead, NULL);
+//                        // TODO: Parse ESM structure
+//                        // TODO: Build tree of records
+//                        // TODO: Print out tree to file
+                        int sdaf = 23234;
+                        HeapFree(GetProcessHeap(), 0, masterFileContents);
+                    }
+
+                    EnableMenuItem(fileMenu, FILE_NEW_MOD, MF_ENABLED);
+                    EnableMenuItem(fileMenu, FILE_OPEN_MOD, MF_ENABLED);
+                    break;
+                case FILE_NEW_MOD:
+                    MessageBox(NULL, "New mod...", "", MB_OK);
+                    break;
+                case FILE_OPEN_MOD:
+                    MessageBox(NULL, "Open mod...", "", MB_OK);
+                    break;
+                case FILE_SAVE_MOD:
+                    MessageBox(NULL, "Save mod...", "", MB_OK);
                     break;
                 case FILE_EXIT:
                     PostQuitMessage(0);
@@ -54,11 +205,8 @@ LONG WINAPI WindowMessageHandler(HWND window, UINT message, WPARAM wParam, LPARA
 }
 
 int WINAPI WinMain(HINSTANCE instance, HINSTANCE previousInstance, LPTSTR commandLine, int commandShow) {
-    ACCEL accel[] = { FCONTROL | FVIRTKEY, 'Q', FILE_EXIT };
-    HACCEL hAccel = CreateAcceleratorTable(accel, 1);
-
-    MSG message;
-    WNDCLASS windowClass;
+    ACCEL acceleratorsTable[] = ACCELERATORS_TABLE;
+    accelerators = CreateAcceleratorTable(acceleratorsTable, ACCELERATORS_TABLE_LENGTH);
     windowClass.style = CS_OWNDC;
     windowClass.lpfnWndProc = (WNDPROC)WindowMessageHandler;
     windowClass.cbClsExtra = 0;
@@ -75,7 +223,7 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE previousInstance, LPTSTR comman
 
     while (!done && message.message != WM_QUIT) {
         if (PeekMessage(&message, 0, 0, 0, PM_REMOVE)) {
-            if (!TranslateAccelerator(window, hAccel, &message)) {
+            if (!TranslateAccelerator(window, accelerators, &message)) {
                 TranslateMessage(&message);
                 DispatchMessage(&message);
             }
@@ -83,7 +231,6 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE previousInstance, LPTSTR comman
             Sleep(50);
         }
     }
-
 
     return (int)message.wParam;
 }
