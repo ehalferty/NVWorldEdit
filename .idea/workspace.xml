@@ -12,11 +12,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="61c5c767-f8d0-44e9-925e-c134685975bb" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/.clang-tidy" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/NVWorldEdit.dir/main.c.obj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/NVWorldEdit.dir/objects.a" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/NVWorldEdit.dir/objects.a" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/NVWorldEdit.exe" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/NVWorldEdit.exe" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/main.c" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
@@ -42,8 +38,8 @@
       <file leaf-file-name="main.c" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="582">
-              <caret line="145" selection-start-line="145" selection-end-line="145" />
+            <state relative-caret-position="168">
+              <caret line="193" selection-start-line="193" selection-end-line="193" />
               <folding>
                 <element signature="e#0#20#0" expanded="true" />
               </folding>
@@ -189,16 +185,15 @@
       <updated>1523339696456</updated>
       <workItem from="1523339698598" duration="69000" />
       <workItem from="1523339883894" duration="12399000" />
-      <workItem from="1523477992823" duration="24448000" />
+      <workItem from="1523477992823" duration="28926000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="36916000" />
+    <option name="totallyTimeSpent" value="41394000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1176" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.18020834" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -211,7 +206,7 @@
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info id="Favorites" order="2" side_tool="true" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.27709708" />
+      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.6569274" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -231,22 +226,22 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/main.c</url>
-          <line>166</line>
+          <line>214</line>
           <option name="timeStamp" value="15" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/main.c</url>
-          <line>152</line>
+          <line>200</line>
           <option name="timeStamp" value="17" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/main.c</url>
-          <line>149</line>
+          <line>197</line>
           <option name="timeStamp" value="19" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/main.c</url>
-          <line>146</line>
+          <line>193</line>
           <option name="timeStamp" value="21" />
         </line-breakpoint>
       </breakpoints>
@@ -256,13 +251,37 @@
       <configuration name="CMakeRunConfiguration">
         <watch expression="openFileName" language="ObjectiveC" />
         <watch expression="masterFileContents" language="ObjectiveC" />
-        <watch expression="masterFileContents[location + 5]" language="ObjectiveC" />
-        <watch expression="masterFileContents[location + 6] &lt;&lt; 8" language="ObjectiveC" />
+        <watch expression="masterFileRecords" language="ObjectiveC" />
       </configuration>
     </watches-manager>
   </component>
   <component name="debuggerHistoryManager">
     <expressions id="watch">
+      <expression>
+        <expression-string>masterFileRecords</expression-string>
+        <language-id>ObjectiveC</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>*recordsList</expression-string>
+        <language-id>ObjectiveC</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>(*recordsList)-&gt;tail)</expression-string>
+        <language-id>ObjectiveC</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>(*recordsList)-&gt;tail</expression-string>
+        <language-id>ObjectiveC</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>(*recordsList)</expression-string>
+        <language-id>ObjectiveC</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
       <expression>
         <expression-string>masterFileContents[location + 6] &lt;&lt; 8</expression-string>
         <language-id>ObjectiveC</language-id>
@@ -285,11 +304,6 @@
       </expression>
       <expression>
         <expression-string>fileSizeHighOrder</expression-string>
-        <language-id>ObjectiveC</language-id>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>openFileName</expression-string>
         <language-id>ObjectiveC</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
@@ -402,8 +416,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="582">
-          <caret line="145" selection-start-line="145" selection-end-line="145" />
+        <state relative-caret-position="168">
+          <caret line="193" selection-start-line="193" selection-end-line="193" />
           <folding>
             <element signature="e#0#20#0" expanded="true" />
           </folding>

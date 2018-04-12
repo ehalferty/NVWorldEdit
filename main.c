@@ -76,9 +76,38 @@ WNDCLASS windowClass = {};
 OPENFILENAME openFileName;
 UINT8 fileName[MAX_PATH] = "";
 UINT8 *masterFileContents = NULL;
-struct Record *masterFileRecords = NULL;
+struct RecordNode *masterFileRecords = NULL;
 UINT8 *modFileContents = NULL;
-struct Record *modFileRecords = NULL;
+struct RecordNode *modFileRecords = NULL;
+
+struct RecordNode *AppendRecordNode(struct RecordNode **recordsList) {
+    struct RecordNode *newNode = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(struct RecordNode));
+    newNode->head = *recordsList;
+    if (*recordsList) {
+        if ((*recordsList)->tail) {
+            (*recordsList)->tail->next = newNode;
+        } else {
+            (*recordsList)->next = newNode;
+        }
+        (*recordsList)->tail = newNode;
+    } else {
+        *recordsList = newNode;
+    }
+    return newNode;
+}
+
+void SetGroupHeader(struct RecordNode *recordNode, UINT32 groupSize, CONST UINT8 *label, INT32 groupType, UINT32 stamp) {
+    recordNode->groupHeader.type[0] = 'G';
+    recordNode->groupHeader.type[1] = 'R';
+    recordNode->groupHeader.type[2] = 'U';
+    recordNode->groupHeader.type[3] = 'P';
+    recordNode->groupHeader.groupSize = groupSize;
+    for (int i = 0; i < 4; i++) {
+        recordNode->groupHeader.label[i] = label[i];
+    }
+    recordNode->groupHeader.groupType = groupType;
+    recordNode->groupHeader.stamp = stamp;
+}
 
 LONG WINAPI WindowMessageHandler(HWND window, UINT message, WPARAM wParam, LPARAM lParam) {
     static PAINTSTRUCT paintStruct;
@@ -138,16 +167,30 @@ LONG WINAPI WindowMessageHandler(HWND window, UINT message, WPARAM wParam, LPARA
                                 for (int i = 0; i < 1024; i++) {
                                     thisGrupBuffer[i] = masterFileContents[location + i];
                                 }
-                                // Read in size.
-                                UINT64 size = masterFileContents[location + 4] +
+                                // Read in groupSize.
+                                UINT32 groupSize = masterFileContents[location + 4] +
                                               (masterFileContents[location + 5] << 8) +
                                               (masterFileContents[location + 6] << 16) +
                                               (masterFileContents[location + 7] << 24);
-                                UINT64 nextGrup = location + size;
+                                UINT64 nextGrup = location + groupSize;
                                 CHAR nextGrupBuffer[1024];
                                 for (int i = 0; i < 1024; i++) {
                                     nextGrupBuffer[i] = masterFileContents[nextGrup + i];
                                 }
+                                struct RecordNode *newNode = AppendRecordNode(&masterFileRecords);
+                                UINT8 label[4];
+                                for (int i = 0; i < 4; i++) {
+                                    label[i] = masterFileContents[location + 8 + i];
+                                }
+                                INT32 groupType = masterFileContents[location + 12] +
+                                                  (masterFileContents[location + 13] << 8) +
+                                                  (masterFileContents[location + 14] << 16) +
+                                                  (masterFileContents[location + 15] << 24);
+                                UINT32 stamp = masterFileContents[location + 16] +
+                                                  (masterFileContents[location + 17] << 8) +
+                                                  (masterFileContents[location + 18] << 16) +
+                                                  (masterFileContents[location + 19] << 24);
+                                SetGroupHeader(newNode, groupSize, label, groupType, stamp);
                                 int jhsdjkfhdjkh = 2343;
                                 location = nextGrup;
                             } else {
