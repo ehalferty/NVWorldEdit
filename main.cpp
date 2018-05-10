@@ -1,250 +1,94 @@
 #include <windows.h>
 #include <GL/gl.h>
 #include <GL/glcorearb.h>
-
-#define CLASS_NAME "NVWorldEdit"
-#define WINDOW_TITLE "NVWorldEdit v0.0.1subalpha"
-#define WINDOW_STYLE (WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN)
-
-#define FILE_OPEN_MASTER 100
-#define FILE_NEW_MOD 101
-#define FILE_OPEN_MOD 102
-#define FILE_SAVE_MOD 103
-#define FILE_EXIT 150
-
-#define ACCELERATORS_TABLE_LENGTH 5
-#define ACCELERATORS_TABLE {\
-    { (UINT)FCONTROL | (UINT)FVIRTKEY, 'M', FILE_OPEN_MASTER },\
-    { (UINT)FCONTROL | (UINT)FVIRTKEY, 'N', FILE_NEW_MOD },\
-    { (UINT)FCONTROL | (UINT)FVIRTKEY, 'O', FILE_OPEN_MOD },\
-    { (UINT)FCONTROL | (UINT)FVIRTKEY, 'S', FILE_SAVE_MOD },\
-    { (UINT)FCONTROL | (UINT)FVIRTKEY, 'Q', FILE_EXIT }\
-}
-
-struct RecordNodeMetadata {
-    // Node type. 0 = regular, 1 = group, 2 = sub-record
-    CHAR nodeType;
-    // Where in the file was it located when parsed?
-    UINT32 offset;
-    // Has this been changed since reading from disk?
-    BOOL dirty;
-    // If it has a parent, cache a pointer to it here.
-    struct Record *parent;
+#include <type_traits>
+LPCSTR CONST className = "NVWorldEdit";
+LPCSTR CONST windowTitle = "NVWorldEdit v0.0.1subalpha";
+DWORD CONST windowStyle = WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
+POINT CONST windowSize = { 640, 480};
+enum class MenuItems {
+    FILE_OPEN_MASTER = 101,
+    FILE_NEW_MOD,
+    FILE_OPEN_MOD,
+    FILE_SAVE_MOD,
+    FILE_EXIT
 };
-
-struct RecordHeader {
-    UINT8 type[4];
-    UINT32 dataSize;
-    UINT32 flags;
-    UINT32 formID;
-    UINT32 versionControlInfo;
-};
-
-struct GroupHeader {
-    UINT8 type[4];
-    UINT32 groupSize;
-    UINT8 label[4];
-    INT32 groupType;
-    UINT32 stamp;
-};
-
-struct SubRecordHeader {
-    UINT8 subType[4];
-    UINT16 dataSize;
-};
-
-struct RecordNode {
-    struct RecordNodeMetadata recordNodeMetadata;
-    struct RecordHeader recordHeader;
-    struct GroupHeader groupHeader;
-    struct SubRecordHeader subRecordHeader;
-    UINT8 *data;
-    UINT8 *uncompressedData;
-    struct RecordNode *subRecords;
-    struct RecordNode *next;
-    struct RecordNode *head;
-    struct RecordNode *tail;
-};
-
+ACCEL CONST acceleratorsTable[] = {
+        { (UINT)FCONTROL | (UINT)FVIRTKEY, 'M', (INT)MenuItems::FILE_OPEN_MASTER },
+        { (UINT)FCONTROL | (UINT)FVIRTKEY, 'N', (INT)MenuItems::FILE_NEW_MOD },
+        { (UINT)FCONTROL | (UINT)FVIRTKEY, 'O', (INT)MenuItems::FILE_OPEN_MOD },
+        { (UINT)FCONTROL | (UINT)FVIRTKEY, 'S', (INT)MenuItems::FILE_SAVE_MOD },
+        { (UINT)FCONTROL | (UINT)FVIRTKEY, 'Q', (INT)MenuItems::FILE_EXIT }};
+SIZE_T CONST acceleratorsTableLength = std::extent<decltype(acceleratorsTable)>::value;
 BOOL done = FALSE;
-HWND window = NULL;
-HMENU menubar = NULL;
-HMENU fileMenu = NULL;
-HACCEL accelerators = NULL;
+HWND window = nullptr;
+HMENU menubar = nullptr;
+HMENU fileMenu = nullptr;
+HACCEL accelerators = nullptr;
 MSG message = {};
 WNDCLASS windowClass = {};
 OPENFILENAME openFileName;
 UINT8 fileName[MAX_PATH] = "";
-UINT8 *masterFileContents = NULL;
-struct RecordNode *masterFileRecords = NULL;
-UINT8 *modFileContents = NULL;
-struct RecordNode *modFileRecords = NULL;
-
-// Add new record to the linked list
-struct RecordNode *AppendRecordNode(struct RecordNode **recordsList) {
-    struct RecordNode *newNode = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(struct RecordNode));
-    newNode->head = *recordsList;
-    if (*recordsList) {
-        if ((*recordsList)->tail) {
-            (*recordsList)->tail->next = newNode;
-        } else {
-            (*recordsList)->next = newNode;
-        }
-        (*recordsList)->tail = newNode;
-    } else {
-        *recordsList = newNode;
+UINT8 *masterFileContents = nullptr;
+UINT8 *modFileContents = nullptr;
+void HandleFileOpenMaster() {
+    // TODO: Guess where NV is https://gamedev.stackexchange.com/questions/124100/is-there-a-reliable-and-fast-way-of-getting-a-list-of-all-installed-games-on-a-w
+    // TODO: Expand this to a custom modal dialog which has you find a folder and then lists all ESMs
+    // TODO:  and stores stuff in registry.
+    ZeroMemory(&fileName, sizeof(fileName));
+    ZeroMemory(&openFileName, sizeof(openFileName));
+    openFileName.lStructSize = sizeof(openFileName);
+    openFileName.hwndOwner = window;
+    openFileName.lpstrFilter = "ESM Files (*.esm)\0*.esm\0All Files (*.*)\0*.*\0";
+    openFileName.lpstrFile = (LPSTR)fileName;
+    openFileName.nMaxFile = MAX_PATH;
+    openFileName.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST;
+    openFileName.lpstrDefExt = "esm";
+    int getFileOpenNameResult = GetOpenFileName(&openFileName);
+    if (getFileOpenNameResult) {
+        HANDLE fileHandle = CreateFile(openFileName.lpstrFile, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+        LARGE_INTEGER fileSizeInBytes;
+        BOOL getFileSizeResult = GetFileSizeEx(fileHandle, &fileSizeInBytes);
+        masterFileContents = (UINT8 *)HeapAlloc(GetProcessHeap(), 0, (size_t)fileSizeInBytes.QuadPart);
+        DWORD numberOfBytesActuallyRead = 0;
+        BOOL readFileResult = ReadFile(fileHandle, masterFileContents, (size_t)fileSizeInBytes.QuadPart, &numberOfBytesActuallyRead, nullptr);
+        // Find CELL
+        HeapFree(GetProcessHeap(), 0, masterFileContents);
     }
-    return newNode;
+    EnableMenuItem(fileMenu, (INT)MenuItems::FILE_NEW_MOD, MF_ENABLED);
+    EnableMenuItem(fileMenu, (INT)MenuItems::FILE_OPEN_MOD, MF_ENABLED);
 }
-
-// Set header data on record node
-VOID SetGroupHeader(struct RecordNode *recordNode, UINT32 groupSize, CONST UINT8 *label, INT32 groupType, UINT32 stamp) {
-    recordNode->groupHeader.type[0] = 'G';
-    recordNode->groupHeader.type[1] = 'R';
-    recordNode->groupHeader.type[2] = 'U';
-    recordNode->groupHeader.type[3] = 'P';
-    recordNode->groupHeader.groupSize = groupSize;
-    for (int i = 0; i < 4; i++) {
-        recordNode->groupHeader.label[i] = label[i];
-    }
-    recordNode->groupHeader.groupType = groupType;
-    recordNode->groupHeader.stamp = stamp;
-}
-
-BOOL fourCharsMatch(UINT8 CONST *fourChars, CHAR CONST fourChars2[5]) {
-    return strncmp((CHAR*)fourChars, fourChars2, 4) == 0;
-}
-
-void BuildRecordsListFromFileContents(struct RecordNode **recordsList, UINT8 CONST *fileContents, LARGE_INTEGER fileSizeInBytes) {
-    // TODO: Verify that file starts with the right stuff... 'TES4'... 'HEDR'... 'GRUP'... etc. etc.
-    // Locate all top-level records
-    // Find the first GRUP
-    UINT64 location = 0;
-    while (!fourCharsMatch(&fileContents[location], "GRUP")) { location++; }
-    // TODO: Handle GRUP not found
-    while (location < fileSizeInBytes.QuadPart) {
-        // Is there a GRUP?
-        if (fourCharsMatch(&fileContents[location], "GRUP")) {
-            CHAR thisGrupBuffer[1024];
-            for (int i = 0; i < 1024; i++) {
-                thisGrupBuffer[i] = fileContents[location + i];
-            }
-            // Read in groupSize.
-            UINT32 groupSize = fileContents[location + 4] +
-                               (fileContents[location + 5] << 8) +
-                               (fileContents[location + 6] << 16) +
-                               (fileContents[location + 7] << 24);
-            UINT64 nextGrup = location + groupSize;
-            // Load next GRUP into buffer. I just did this to verify that the next GRUP is properly aligned. Remove.
-            CHAR nextGrupBuffer[1024];
-            for (int i = 0; i < 1024; i++) {
-                nextGrupBuffer[i] = fileContents[nextGrup + i];
-            }
-            struct RecordNode *newNode = AppendRecordNode(recordsList);
-            UINT8 label[4];
-            for (int i = 0; i < 4; i++) {
-                label[i] = fileContents[location + 8 + i];
-            }
-            INT32 groupType = fileContents[location + 12] +
-                              (fileContents[location + 13] << 8) +
-                              (fileContents[location + 14] << 16) +
-                              (fileContents[location + 15] << 24);
-            UINT32 stamp = fileContents[location + 16] +
-                           (fileContents[location + 17] << 8) +
-                           (fileContents[location + 18] << 16) +
-                           (fileContents[location + 19] << 24);
-            SetGroupHeader(newNode, groupSize, label, groupType, stamp);
-            // Do we care about this group of records?
-            if (fourCharsMatch(label, "CELL")) {
-                // We definitely care about CELL records.
-                // TODO: Ge all sun-records.
-                int asdfasd = 234234;
-            } else if (fourCharsMatch(label, "REFR")) {
-                // Objects placed in cells.
-            }
-
-            // TODO:
-            int jhsdjkfhdjkh = 2343;
-            location = nextGrup;
-        } else {
-            // Unknown top-level data!
-            int sdfdfkjkdf = 2343;
-        }
-    }
-}
-
 LONG WINAPI WindowMessageHandler(HWND window, UINT message, WPARAM wParam, LPARAM lParam) {
     static PAINTSTRUCT paintStruct;
     switch (message) {
         case WM_CREATE:
             menubar = CreateMenu();
             fileMenu = CreateMenu();
-            AppendMenu(fileMenu, MF_STRING, FILE_OPEN_MASTER, "Open &Master...\tCtrl+M");
-            AppendMenu(fileMenu, MF_STRING | MF_GRAYED, FILE_NEW_MOD, "&New Mod...\tCtrl+N");
-            AppendMenu(fileMenu, MF_STRING | MF_GRAYED, FILE_OPEN_MOD, "&Open Mod...\tCtrl+O");
+            AppendMenu(fileMenu, MF_STRING, (INT)MenuItems::FILE_OPEN_MASTER, "Open &Master...\tCtrl+M");
+            AppendMenu(fileMenu, MF_STRING | MF_GRAYED, (INT)MenuItems::FILE_NEW_MOD, "&New Mod...\tCtrl+N");
+            AppendMenu(fileMenu, MF_STRING | MF_GRAYED, (INT)MenuItems::FILE_OPEN_MOD, "&Open Mod...\tCtrl+O");
             AppendMenu(fileMenu, MF_SEPARATOR, 0, "-");
-            AppendMenu(fileMenu, MF_STRING | MF_GRAYED, FILE_SAVE_MOD, "&Save Mod...\tCtrl+S");
+            AppendMenu(fileMenu, MF_STRING | MF_GRAYED, (INT)MenuItems::FILE_SAVE_MOD, "&Save Mod...\tCtrl+S");
             AppendMenu(fileMenu, MF_SEPARATOR, 0, "-");
-            AppendMenu(fileMenu, MF_STRING, FILE_EXIT, "E&xit\tCtrl-Q");
+            AppendMenu(fileMenu, MF_STRING, (INT)MenuItems::FILE_EXIT, "E&xit\tCtrl-Q");
             AppendMenu(menubar, MF_POPUP, (UINT_PTR)fileMenu, "&File");
             SetMenu(window, menubar);
             break;
         case WM_COMMAND:
             switch (LOWORD(wParam)) {
-                case FILE_OPEN_MASTER:
-                    // TODO: Guess where NV is https://gamedev.stackexchange.com/questions/124100/is-there-a-reliable-and-fast-way-of-getting-a-list-of-all-installed-games-on-a-w
-                    // TODO: Expand this to a custom modal dialog which has you find a folder and then lists all ESMs
-                    // TODO:  and stores stuff in registry.
-                    ZeroMemory(&fileName, sizeof(fileName));
-                    ZeroMemory(&openFileName, sizeof(openFileName));
-                    openFileName.lStructSize = sizeof(openFileName);
-                    openFileName.hwndOwner = window;
-                    openFileName.lpstrFilter = "ESM Files (*.esm)\0*.esm\0All Files (*.*)\0*.*\0";
-                    openFileName.lpstrFile = (LPSTR)fileName;
-                    openFileName.nMaxFile = MAX_PATH;
-                    openFileName.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST;
-                    openFileName.lpstrDefExt = "esm";
-                    int getFileOpenNameResult = GetOpenFileName(&openFileName);
-                    if (getFileOpenNameResult) {
-                        HANDLE fileHandle = CreateFile(openFileName.lpstrFile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-                        LARGE_INTEGER fileSizeInBytes;
-                        BOOL getFileSizeResult = GetFileSizeEx(fileHandle, &fileSizeInBytes);
-                        masterFileContents = HeapAlloc(GetProcessHeap(), 0, (size_t)fileSizeInBytes.QuadPart);
-                        DWORD numberOfBytesActuallyRead = 0;
-                        BOOL readFileResult = ReadFile(fileHandle, masterFileContents, (size_t)fileSizeInBytes.QuadPart, &numberOfBytesActuallyRead, NULL);
-                        BuildRecordsListFromFileContents(&masterFileRecords, masterFileContents , fileSizeInBytes);
-
-                        int asdfasd = 23423;
-
-
-//                        for (int i = 0; i < (fileSizeInBytes.QuadPart / 1024); i++) {
-//                            CHAR buffer[1024];
-////                            CopyMemory(fileContents + i * 1024, &buffer, 1024);
-//                        }
-//                        CHAR masterFileContents[16*1024*1024];
-//                        ZeroMemory(&masterFileContents, sizeof(masterFileContents));
-//                        DWORD numberOfBytesActuallyRead = 0;
-//                        BOOL readFileResult = ReadFile(fileHandle, &masterFileContents, 16*1024*1024, &numberOfBytesActuallyRead, NULL);
-//                        // TODO: Parse ESM structure
-//                        // TODO: Build tree of records
-//                        // TODO: Print out tree to file
-                        int sdaf = 23234;
-                        HeapFree(GetProcessHeap(), 0, masterFileContents);
-                    }
-
-                    EnableMenuItem(fileMenu, FILE_NEW_MOD, MF_ENABLED);
-                    EnableMenuItem(fileMenu, FILE_OPEN_MOD, MF_ENABLED);
+                case (INT)MenuItems::FILE_OPEN_MASTER:
+                    HandleFileOpenMaster();
                     break;
-                case FILE_NEW_MOD:
-                    MessageBox(NULL, "New mod...", "", MB_OK);
+                case (INT)MenuItems::FILE_NEW_MOD:
+                    MessageBox(nullptr, "New mod...", "", MB_OK);
                     break;
-                case FILE_OPEN_MOD:
-                    MessageBox(NULL, "Open mod...", "", MB_OK);
+                case (INT)MenuItems::FILE_OPEN_MOD:
+                    MessageBox(nullptr, "Open mod...", "", MB_OK);
                     break;
-                case FILE_SAVE_MOD:
-                    MessageBox(NULL, "Save mod...", "", MB_OK);
+                case (INT)MenuItems::FILE_SAVE_MOD:
+                    MessageBox(nullptr, "Save mod...", "", MB_OK);
                     break;
-                case FILE_EXIT:
+                case (INT)MenuItems::FILE_EXIT:
                     PostQuitMessage(0);
                     break;
                 default:
@@ -262,26 +106,23 @@ LONG WINAPI WindowMessageHandler(HWND window, UINT message, WPARAM wParam, LPARA
             return (LONG)DefWindowProc(window, message, wParam, lParam);
     }
 }
-
 int WINAPI WinMain(HINSTANCE instance, HINSTANCE previousInstance, LPTSTR commandLine, int commandShow) {
-    ACCEL acceleratorsTable[] = ACCELERATORS_TABLE;
-    accelerators = CreateAcceleratorTable(acceleratorsTable, ACCELERATORS_TABLE_LENGTH);
+    accelerators = CreateAcceleratorTable((LPACCEL)acceleratorsTable, acceleratorsTableLength);
     windowClass.style = CS_OWNDC;
     windowClass.lpfnWndProc = (WNDPROC)WindowMessageHandler;
     windowClass.cbClsExtra = 0;
     windowClass.cbWndExtra = 0;
     windowClass.hInstance = instance;
-    windowClass.hIcon = LoadIcon(NULL, IDI_WINLOGO);
-    windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
-    windowClass.hbrBackground = NULL;
-    windowClass.lpszMenuName = NULL;
-    windowClass.lpszClassName = CLASS_NAME;
+    windowClass.hIcon = LoadIcon(nullptr, IDI_WINLOGO);
+    windowClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
+    windowClass.hbrBackground = nullptr;
+    windowClass.lpszMenuName = nullptr;
+    windowClass.lpszClassName = className;
     RegisterClass(&windowClass);
-    window = CreateWindow(CLASS_NAME, WINDOW_TITLE, WINDOW_STYLE, 0, 0, 640, 480, NULL, NULL, instance, NULL);
+    window = CreateWindow(className, windowTitle, windowStyle, 0, 0, windowSize.x, windowSize.y, nullptr, nullptr, instance, nullptr);
     ShowWindow(window, commandShow);
-
     while (!done && message.message != WM_QUIT) {
-        if (PeekMessage(&message, 0, 0, 0, PM_REMOVE)) {
+        if (PeekMessage(&message, nullptr, 0, 0, PM_REMOVE)) {
             if (!TranslateAccelerator(window, accelerators, &message)) {
                 TranslateMessage(&message);
                 DispatchMessage(&message);
@@ -290,9 +131,176 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE previousInstance, LPTSTR comman
             Sleep(50);
         }
     }
-
     return (int)message.wParam;
 }
+
+
+
+
+
+
+
+
+
+
+
+//struct RecordNodeMetadata {
+//    // Node type. 0 = regular, 1 = group, 2 = sub-record
+//    CHAR nodeType;
+//    // Where in the file was it located when parsed?
+//    UINT32 offset;
+//    // Has this been changed since reading from disk?
+//    BOOL dirty;
+//    // If it has a parent, cache a pointer to it here.
+//    struct Record *parent;
+//};
+//
+//struct RecordHeader {
+//    UINT8 type[4];
+//    UINT32 dataSize;
+//    UINT32 flags;
+//    UINT32 formID;
+//    UINT32 versionControlInfo;
+//};
+//
+//struct GroupHeader {
+//    UINT8 type[4];
+//    UINT32 groupSize;
+//    UINT8 label[4];
+//    INT32 groupType;
+//    UINT32 stamp;
+//};
+//
+//struct SubRecordHeader {
+//    UINT8 subType[4];
+//    UINT16 dataSize;
+//};
+//
+//struct RecordNode {
+//    struct RecordNodeMetadata recordNodeMetadata;
+//    struct RecordHeader recordHeader;
+//    struct GroupHeader groupHeader;
+//    struct SubRecordHeader subRecordHeader;
+//    UINT8 *data;
+//    UINT8 *uncompressedData;
+//    struct RecordNode *subRecords;
+//    struct RecordNode *next;
+//    struct RecordNode *head;
+//    struct RecordNode *tail;
+//};
+
+//                        BuildRecordsListFromFileContents(&masterFileRecords, masterFileContents , fileSizeInBytes);
+
+//int asdfasd = 23423;
+
+
+//                        for (int i = 0; i < (fileSizeInBytes.QuadPart / 1024); i++) {
+//                            CHAR buffer[1024];
+////                            CopyMemory(fileContents + i * 1024, &buffer, 1024);
+//                        }
+//                        CHAR masterFileContents[16*1024*1024];
+//                        ZeroMemory(&masterFileContents, sizeof(masterFileContents));
+//                        DWORD numberOfBytesActuallyRead = 0;
+//                        BOOL readFileResult = ReadFile(fileHandle, &masterFileContents, 16*1024*1024, &numberOfBytesActuallyRead, NULL);
+//                        // TODO: Parse ESM structure
+//                        // TODO: Build tree of records
+//                        // TODO: Print out tree to file
+int sdaf = 23234;
+//struct RecordNode *masterFileRecords = NULL;
+//struct RecordNode *modFileRecords = NULL;
+
+// Add new record to the linked list
+//struct RecordNode *AppendRecordNode(struct RecordNode **recordsList) {
+//    struct RecordNode *newNode = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(struct RecordNode));
+//    newNode->head = *recordsList;
+//    if (*recordsList) {
+//        if ((*recordsList)->tail) {
+//            (*recordsList)->tail->next = newNode;
+//        } else {
+//            (*recordsList)->next = newNode;
+//        }
+//        (*recordsList)->tail = newNode;
+//    } else {
+//        *recordsList = newNode;
+//    }
+//    return newNode;
+//}
+//
+//// Set header data on record node
+//VOID SetGroupHeader(struct RecordNode *recordNode, UINT32 groupSize, CONST UINT8 *label, INT32 groupType, UINT32 stamp) {
+//    recordNode->groupHeader.type[0] = 'G';
+//    recordNode->groupHeader.type[1] = 'R';
+//    recordNode->groupHeader.type[2] = 'U';
+//    recordNode->groupHeader.type[3] = 'P';
+//    recordNode->groupHeader.groupSize = groupSize;
+//    for (int i = 0; i < 4; i++) {
+//        recordNode->groupHeader.label[i] = label[i];
+//    }
+//    recordNode->groupHeader.groupType = groupType;
+//    recordNode->groupHeader.stamp = stamp;
+//}
+//
+//BOOL fourCharsMatch(UINT8 CONST *fourChars, CHAR CONST fourChars2[5]) {
+//    return strncmp((CHAR*)fourChars, fourChars2, 4) == 0;
+//}
+//
+//void BuildRecordsListFromFileContents(struct RecordNode **recordsList, UINT8 CONST *fileContents, LARGE_INTEGER fileSizeInBytes) {
+//    // TODO: Verify that file starts with the right stuff... 'TES4'... 'HEDR'... 'GRUP'... etc. etc.
+//    // Locate all top-level records
+//    // Find the first GRUP
+//    UINT64 location = 0;
+//    while (!fourCharsMatch(&fileContents[location], "GRUP")) { location++; }
+//    // TODO: Handle GRUP not found
+//    while (location < fileSizeInBytes.QuadPart) {
+//        // Is there a GRUP?
+//        if (fourCharsMatch(&fileContents[location], "GRUP")) {
+//            CHAR thisGrupBuffer[1024];
+//            for (int i = 0; i < 1024; i++) {
+//                thisGrupBuffer[i] = fileContents[location + i];
+//            }
+//            // Read in groupSize.
+//            UINT32 groupSize = fileContents[location + 4] +
+//                               (fileContents[location + 5] << 8) +
+//                               (fileContents[location + 6] << 16) +
+//                               (fileContents[location + 7] << 24);
+//            UINT64 nextGrup = location + groupSize;
+//            // Load next GRUP into buffer. I just did this to verify that the next GRUP is properly aligned. Remove.
+//            CHAR nextGrupBuffer[1024];
+//            for (int i = 0; i < 1024; i++) {
+//                nextGrupBuffer[i] = fileContents[nextGrup + i];
+//            }
+//            struct RecordNode *newNode = AppendRecordNode(recordsList);
+//            UINT8 label[4];
+//            for (int i = 0; i < 4; i++) {
+//                label[i] = fileContents[location + 8 + i];
+//            }
+//            INT32 groupType = fileContents[location + 12] +
+//                              (fileContents[location + 13] << 8) +
+//                              (fileContents[location + 14] << 16) +
+//                              (fileContents[location + 15] << 24);
+//            UINT32 stamp = fileContents[location + 16] +
+//                           (fileContents[location + 17] << 8) +
+//                           (fileContents[location + 18] << 16) +
+//                           (fileContents[location + 19] << 24);
+//            SetGroupHeader(newNode, groupSize, label, groupType, stamp);
+//            // Do we care about this group of records?
+//            if (fourCharsMatch(label, "CELL")) {
+//                // We definitely care about CELL records.
+//                // TODO: Ge all sun-records.
+//                int asdfasd = 234234;
+//            } else if (fourCharsMatch(label, "REFR")) {
+//                // Objects placed in cells.
+//            }
+//
+//            // TODO:
+//            int jhsdjkfhdjkh = 2343;
+//            location = nextGrup;
+//        } else {
+//            // Unknown top-level data!
+//            int sdfdfkjkdf = 2343;
+//        }
+//    }
+//}
 
 
 
