@@ -80,6 +80,7 @@ struct RecordNode *masterFileRecords = NULL;
 UINT8 *modFileContents = NULL;
 struct RecordNode *modFileRecords = NULL;
 
+// Add new record to the linked list
 struct RecordNode *AppendRecordNode(struct RecordNode **recordsList) {
     struct RecordNode *newNode = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(struct RecordNode));
     newNode->head = *recordsList;
@@ -96,7 +97,8 @@ struct RecordNode *AppendRecordNode(struct RecordNode **recordsList) {
     return newNode;
 }
 
-void SetGroupHeader(struct RecordNode *recordNode, UINT32 groupSize, CONST UINT8 *label, INT32 groupType, UINT32 stamp) {
+// Set header data on record node
+VOID SetGroupHeader(struct RecordNode *recordNode, UINT32 groupSize, CONST UINT8 *label, INT32 groupType, UINT32 stamp) {
     recordNode->groupHeader.type[0] = 'G';
     recordNode->groupHeader.type[1] = 'R';
     recordNode->groupHeader.type[2] = 'U';
@@ -107,6 +109,68 @@ void SetGroupHeader(struct RecordNode *recordNode, UINT32 groupSize, CONST UINT8
     }
     recordNode->groupHeader.groupType = groupType;
     recordNode->groupHeader.stamp = stamp;
+}
+
+BOOL fourCharsMatch(UINT8 CONST *fourChars, CHAR CONST fourChars2[5]) {
+    return strncmp((CHAR*)fourChars, fourChars2, 4) == 0;
+}
+
+void BuildRecordsListFromFileContents(struct RecordNode **recordsList, UINT8 CONST *fileContents, LARGE_INTEGER fileSizeInBytes) {
+    // TODO: Verify that file starts with the right stuff... 'TES4'... 'HEDR'... 'GRUP'... etc. etc.
+    // Locate all top-level records
+    // Find the first GRUP
+    UINT64 location = 0;
+    while (!fourCharsMatch(&fileContents[location], "GRUP")) { location++; }
+    // TODO: Handle GRUP not found
+    while (location < fileSizeInBytes.QuadPart) {
+        // Is there a GRUP?
+        if (fourCharsMatch(&fileContents[location], "GRUP")) {
+            CHAR thisGrupBuffer[1024];
+            for (int i = 0; i < 1024; i++) {
+                thisGrupBuffer[i] = fileContents[location + i];
+            }
+            // Read in groupSize.
+            UINT32 groupSize = fileContents[location + 4] +
+                               (fileContents[location + 5] << 8) +
+                               (fileContents[location + 6] << 16) +
+                               (fileContents[location + 7] << 24);
+            UINT64 nextGrup = location + groupSize;
+            // Load next GRUP into buffer. I just did this to verify that the next GRUP is properly aligned. Remove.
+            CHAR nextGrupBuffer[1024];
+            for (int i = 0; i < 1024; i++) {
+                nextGrupBuffer[i] = fileContents[nextGrup + i];
+            }
+            struct RecordNode *newNode = AppendRecordNode(recordsList);
+            UINT8 label[4];
+            for (int i = 0; i < 4; i++) {
+                label[i] = fileContents[location + 8 + i];
+            }
+            INT32 groupType = fileContents[location + 12] +
+                              (fileContents[location + 13] << 8) +
+                              (fileContents[location + 14] << 16) +
+                              (fileContents[location + 15] << 24);
+            UINT32 stamp = fileContents[location + 16] +
+                           (fileContents[location + 17] << 8) +
+                           (fileContents[location + 18] << 16) +
+                           (fileContents[location + 19] << 24);
+            SetGroupHeader(newNode, groupSize, label, groupType, stamp);
+            // Do we care about this group of records?
+            if (fourCharsMatch(label, "CELL")) {
+                // We definitely care about CELL records.
+                // TODO: Ge all sun-records.
+                int asdfasd = 234234;
+            } else if (fourCharsMatch(label, "REFR")) {
+                // Objects placed in cells.
+            }
+
+            // TODO:
+            int jhsdjkfhdjkh = 2343;
+            location = nextGrup;
+        } else {
+            // Unknown top-level data!
+            int sdfdfkjkdf = 2343;
+        }
+    }
 }
 
 LONG WINAPI WindowMessageHandler(HWND window, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -148,56 +212,8 @@ LONG WINAPI WindowMessageHandler(HWND window, UINT message, WPARAM wParam, LPARA
                         masterFileContents = HeapAlloc(GetProcessHeap(), 0, (size_t)fileSizeInBytes.QuadPart);
                         DWORD numberOfBytesActuallyRead = 0;
                         BOOL readFileResult = ReadFile(fileHandle, masterFileContents, (size_t)fileSizeInBytes.QuadPart, &numberOfBytesActuallyRead, NULL);
-                        // TODO: Verify that file starts with the right stuff... 'TES4'... 'HEDR'... 'GRUP'... etc. etc.
-                        // Locate all top-level records
-                        // Find the first GRUP
-                        UINT64 location = 0;
-                        while (!(masterFileContents[location + 0] == 'G' &&
-                                masterFileContents[location + 1] == 'R' &&
-                                masterFileContents[location + 2] == 'U' &&
-                                masterFileContents[location + 3] == 'P')) { location++; }
-                        // TODO: Handle GRUP not found
-                        while (location < fileSizeInBytes.QuadPart) {
-                            // Is there a GRUP?
-                            if (masterFileContents[location + 0] == 'G' &&
-                            masterFileContents[location + 1] == 'R' &&
-                            masterFileContents[location + 2] == 'U' &&
-                            masterFileContents[location + 3] == 'P') {
-                                CHAR thisGrupBuffer[1024];
-                                for (int i = 0; i < 1024; i++) {
-                                    thisGrupBuffer[i] = masterFileContents[location + i];
-                                }
-                                // Read in groupSize.
-                                UINT32 groupSize = masterFileContents[location + 4] +
-                                              (masterFileContents[location + 5] << 8) +
-                                              (masterFileContents[location + 6] << 16) +
-                                              (masterFileContents[location + 7] << 24);
-                                UINT64 nextGrup = location + groupSize;
-                                CHAR nextGrupBuffer[1024];
-                                for (int i = 0; i < 1024; i++) {
-                                    nextGrupBuffer[i] = masterFileContents[nextGrup + i];
-                                }
-                                struct RecordNode *newNode = AppendRecordNode(&masterFileRecords);
-                                UINT8 label[4];
-                                for (int i = 0; i < 4; i++) {
-                                    label[i] = masterFileContents[location + 8 + i];
-                                }
-                                INT32 groupType = masterFileContents[location + 12] +
-                                                  (masterFileContents[location + 13] << 8) +
-                                                  (masterFileContents[location + 14] << 16) +
-                                                  (masterFileContents[location + 15] << 24);
-                                UINT32 stamp = masterFileContents[location + 16] +
-                                                  (masterFileContents[location + 17] << 8) +
-                                                  (masterFileContents[location + 18] << 16) +
-                                                  (masterFileContents[location + 19] << 24);
-                                SetGroupHeader(newNode, groupSize, label, groupType, stamp);
-                                int jhsdjkfhdjkh = 2343;
-                                location = nextGrup;
-                            } else {
-                                // Unknown top-level data!
-                                int sdfdfkjkdf = 2343;
-                            }
-                        }
+                        BuildRecordsListFromFileContents(&masterFileRecords, masterFileContents , fileSizeInBytes);
+
                         int asdfasd = 23423;
 
 
