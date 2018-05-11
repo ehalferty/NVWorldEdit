@@ -1,13 +1,14 @@
 #include <windows.h>
+#include <CommCtrl.h>
 #include <GL/gl.h>
 #include <GL/glcorearb.h>
 #include <type_traits>
 LPCSTR CONST className = "NVWorldEdit";
 LPCSTR CONST windowTitle = "NVWorldEdit v0.0.1subalpha";
 DWORD CONST windowStyle = WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
-POINT CONST windowSize = { 640, 480};
+POINT CONST windowSize = { 640, 480 };
 enum class MenuItems {
-    FILE_OPEN_MASTER = 101,
+    FILE_OPEN_MASTER,
     FILE_NEW_MOD,
     FILE_OPEN_MOD,
     FILE_SAVE_MOD,
@@ -20,11 +21,21 @@ ACCEL CONST acceleratorsTable[] = {
         { (UINT)FCONTROL | (UINT)FVIRTKEY, 'S', (INT)MenuItems::FILE_SAVE_MOD },
         { (UINT)FCONTROL | (UINT)FVIRTKEY, 'Q', (INT)MenuItems::FILE_EXIT }};
 SIZE_T CONST acceleratorsTableLength = std::extent<decltype(acceleratorsTable)>::value;
+INT CONST imageListId = 0;
+TBBUTTON toolbarButtons[] = {
+        { MAKELONG(STD_FILENEW,  imageListId), (INT)MenuItems::FILE_OPEN_MASTER,  TBSTATE_ENABLED, BTNS_AUTOSIZE, {0},0,  (INT_PTR)"Open Master" },
+        { MAKELONG(STD_FILEOPEN, imageListId), (INT)MenuItems::FILE_NEW_MOD, 0, BTNS_AUTOSIZE, {0}, 0, (INT_PTR)"New Mod" },
+        { MAKELONG(STD_FILEOPEN, imageListId), (INT)MenuItems::FILE_OPEN_MOD, 0, BTNS_AUTOSIZE, {0}, 0, (INT_PTR)"Open Mod" },
+        { MAKELONG(STD_FILESAVE, imageListId), (INT)MenuItems::FILE_OPEN_MOD, 0, BTNS_AUTOSIZE, {0}, 0, (INT_PTR)"Save Mod" }
+};
+SIZE_T CONST toolbarButtonsLength = std::extent<decltype(toolbarButtons)>::value;
 BOOL done = FALSE;
 HWND window = nullptr;
 HMENU menubar = nullptr;
 HMENU fileMenu = nullptr;
 HACCEL accelerators = nullptr;
+HWND toolbar = nullptr;
+HIMAGELIST toolbarImageList = nullptr;
 MSG message = {};
 WNDCLASS windowClass = {};
 OPENFILENAME openFileName;
@@ -52,6 +63,10 @@ void HandleFileOpenMaster() {
         masterFileContents = (UINT8 *)HeapAlloc(GetProcessHeap(), 0, (size_t)fileSizeInBytes.QuadPart);
         DWORD numberOfBytesActuallyRead = 0;
         BOOL readFileResult = ReadFile(fileHandle, masterFileContents, (size_t)fileSizeInBytes.QuadPart, &numberOfBytesActuallyRead, nullptr);
+//        BOOL foundCell = FALSE;
+//        while (!foundCell) {
+//
+//        }
         // Find CELL
         HeapFree(GetProcessHeap(), 0, masterFileContents);
     }
@@ -60,8 +75,10 @@ void HandleFileOpenMaster() {
 }
 LONG WINAPI WindowMessageHandler(HWND window, UINT message, WPARAM wParam, LPARAM lParam) {
     static PAINTSTRUCT paintStruct;
+    static int toolbarStringIndex = 0;
     switch (message) {
         case WM_CREATE:
+            // Create menu bar
             menubar = CreateMenu();
             fileMenu = CreateMenu();
             AppendMenu(fileMenu, MF_STRING, (INT)MenuItems::FILE_OPEN_MASTER, "Open &Master...\tCtrl+M");
@@ -73,6 +90,15 @@ LONG WINAPI WindowMessageHandler(HWND window, UINT message, WPARAM wParam, LPARA
             AppendMenu(fileMenu, MF_STRING, (INT)MenuItems::FILE_EXIT, "E&xit\tCtrl-Q");
             AppendMenu(menubar, MF_POPUP, (UINT_PTR)fileMenu, "&File");
             SetMenu(window, menubar);
+            // Create toolbar
+            toolbar = CreateWindowEx(0, TOOLBARCLASSNAME, nullptr, WS_CHILD | TBSTYLE_WRAPABLE, 0, 0, 0, 0, window, nullptr, nullptr, nullptr);
+            toolbarImageList = ImageList_Create(16, 16, ILC_COLOR16 | ILC_MASK, 3, 0);
+            SendMessage(toolbar, TB_SETIMAGELIST, (WPARAM)0, (LPARAM)toolbarImageList);
+            SendMessage(toolbar, TB_LOADIMAGES, (WPARAM)IDB_STD_SMALL_COLOR, (LPARAM)HINST_COMMCTRL);
+            SendMessage(toolbar, TB_BUTTONSTRUCTSIZE, (WPARAM)sizeof(TBBUTTON), 0);
+            SendMessage(toolbar, TB_ADDBUTTONS, (WPARAM)toolbarButtonsLength, (LPARAM)&toolbarButtons);
+            SendMessage(toolbar, TB_AUTOSIZE, 0, 0);
+            ShowWindow(toolbar,  TRUE);
             break;
         case WM_COMMAND:
             switch (LOWORD(wParam)) {
