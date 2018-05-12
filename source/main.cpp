@@ -1,4 +1,4 @@
-#include "main.hxx"
+#include "main.hpp"
 
 int WINAPI WinMain(HINSTANCE instance, HINSTANCE previousInstance,
                    LPTSTR commandLine, int commandShow) {

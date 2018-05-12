@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "GameData.hxx"
+#include "GameData.hpp"
 
 class GameMasterData : public GameData {
 public:
