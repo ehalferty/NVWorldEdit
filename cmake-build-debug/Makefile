@@ -122,32 +122,86 @@ NVWorldEdit/fast:
 	$(MAKE) -f CMakeFiles\NVWorldEdit.dir\build.make CMakeFiles/NVWorldEdit.dir/build
 .PHONY : NVWorldEdit/fast
 
-main.obj: main.cpp.obj
+source/GameData.obj: source/GameData.cpp.obj
 
-.PHONY : main.obj
+.PHONY : source/GameData.obj
 
 # target to build an object file
-main.cpp.obj:
-	$(MAKE) -f CMakeFiles\NVWorldEdit.dir\build.make CMakeFiles/NVWorldEdit.dir/main.cpp.obj
-.PHONY : main.cpp.obj
+source/GameData.cpp.obj:
+	$(MAKE) -f CMakeFiles\NVWorldEdit.dir\build.make CMakeFiles/NVWorldEdit.dir/source/GameData.cpp.obj
+.PHONY : source/GameData.cpp.obj
 
-main.i: main.cpp.i
+source/GameData.i: source/GameData.cpp.i
 
-.PHONY : main.i
+.PHONY : source/GameData.i
 
 # target to preprocess a source file
-main.cpp.i:
-	$(MAKE) -f CMakeFiles\NVWorldEdit.dir\build.make CMakeFiles/NVWorldEdit.dir/main.cpp.i
-.PHONY : main.cpp.i
+source/GameData.cpp.i:
+	$(MAKE) -f CMakeFiles\NVWorldEdit.dir\build.make CMakeFiles/NVWorldEdit.dir/source/GameData.cpp.i
+.PHONY : source/GameData.cpp.i
 
-main.s: main.cpp.s
+source/GameData.s: source/GameData.cpp.s
 
-.PHONY : main.s
+.PHONY : source/GameData.s
 
 # target to generate assembly for a file
-main.cpp.s:
-	$(MAKE) -f CMakeFiles\NVWorldEdit.dir\build.make CMakeFiles/NVWorldEdit.dir/main.cpp.s
-.PHONY : main.cpp.s
+source/GameData.cpp.s:
+	$(MAKE) -f CMakeFiles\NVWorldEdit.dir\build.make CMakeFiles/NVWorldEdit.dir/source/GameData.cpp.s
+.PHONY : source/GameData.cpp.s
+
+source/GameMasterData.obj: source/GameMasterData.cpp.obj
+
+.PHONY : source/GameMasterData.obj
+
+# target to build an object file
+source/GameMasterData.cpp.obj:
+	$(MAKE) -f CMakeFiles\NVWorldEdit.dir\build.make CMakeFiles/NVWorldEdit.dir/source/GameMasterData.cpp.obj
+.PHONY : source/GameMasterData.cpp.obj
+
+source/GameMasterData.i: source/GameMasterData.cpp.i
+
+.PHONY : source/GameMasterData.i
+
+# target to preprocess a source file
+source/GameMasterData.cpp.i:
+	$(MAKE) -f CMakeFiles\NVWorldEdit.dir\build.make CMakeFiles/NVWorldEdit.dir/source/GameMasterData.cpp.i
+.PHONY : source/GameMasterData.cpp.i
+
+source/GameMasterData.s: source/GameMasterData.cpp.s
+
+.PHONY : source/GameMasterData.s
+
+# target to generate assembly for a file
+source/GameMasterData.cpp.s:
+	$(MAKE) -f CMakeFiles\NVWorldEdit.dir\build.make CMakeFiles/NVWorldEdit.dir/source/GameMasterData.cpp.s
+.PHONY : source/GameMasterData.cpp.s
+
+source/main.obj: source/main.cpp.obj
+
+.PHONY : source/main.obj
+
+# target to build an object file
+source/main.cpp.obj:
+	$(MAKE) -f CMakeFiles\NVWorldEdit.dir\build.make CMakeFiles/NVWorldEdit.dir/source/main.cpp.obj
+.PHONY : source/main.cpp.obj
+
+source/main.i: source/main.cpp.i
+
+.PHONY : source/main.i
+
+# target to preprocess a source file
+source/main.cpp.i:
+	$(MAKE) -f CMakeFiles\NVWorldEdit.dir\build.make CMakeFiles/NVWorldEdit.dir/source/main.cpp.i
+.PHONY : source/main.cpp.i
+
+source/main.s: source/main.cpp.s
+
+.PHONY : source/main.s
+
+# target to generate assembly for a file
+source/main.cpp.s:
+	$(MAKE) -f CMakeFiles\NVWorldEdit.dir\build.make CMakeFiles/NVWorldEdit.dir/source/main.cpp.s
+.PHONY : source/main.cpp.s
 
 # Help Target
 help:
@@ -158,9 +212,15 @@ help:
 	@echo ... NVWorldEdit
 	@echo ... edit_cache
 	@echo ... rebuild_cache
-	@echo ... main.obj
-	@echo ... main.i
-	@echo ... main.s
+	@echo ... source/GameData.obj
+	@echo ... source/GameData.i
+	@echo ... source/GameData.s
+	@echo ... source/GameMasterData.obj
+	@echo ... source/GameMasterData.i
+	@echo ... source/GameMasterData.s
+	@echo ... source/main.obj
+	@echo ... source/main.i
+	@echo ... source/main.s
 .PHONY : help
 
 

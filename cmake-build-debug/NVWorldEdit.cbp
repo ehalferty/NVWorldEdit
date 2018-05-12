@@ -80,7 +80,22 @@
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="C:/Users/phaz/CLionProjects/NVWorldEdit/main.cpp">
+		<Unit filename="C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameData.cpp">
+			<Option target="NVWorldEdit"/>
+		</Unit>
+		<Unit filename="C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameData.h">
+			<Option target="NVWorldEdit"/>
+		</Unit>
+		<Unit filename="C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameMasterData.cpp">
+			<Option target="NVWorldEdit"/>
+		</Unit>
+		<Unit filename="C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameMasterData.h">
+			<Option target="NVWorldEdit"/>
+		</Unit>
+		<Unit filename="C:/Users/phaz/CLionProjects/NVWorldEdit/source/main.cpp">
+			<Option target="NVWorldEdit"/>
+		</Unit>
+		<Unit filename="C:/Users/phaz/CLionProjects/NVWorldEdit/source/main.h">
 			<Option target="NVWorldEdit"/>
 		</Unit>
 		<Unit filename="C:/Users/phaz/CLionProjects/NVWorldEdit/CMakeLists.txt">

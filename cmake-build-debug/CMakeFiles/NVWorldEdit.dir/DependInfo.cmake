@@ -4,7 +4,9 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "C:/Users/phaz/CLionProjects/NVWorldEdit/main.cpp" "C:/Users/phaz/CLionProjects/NVWorldEdit/cmake-build-debug/CMakeFiles/NVWorldEdit.dir/main.cpp.obj"
+  "C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameData.cpp" "C:/Users/phaz/CLionProjects/NVWorldEdit/cmake-build-debug/CMakeFiles/NVWorldEdit.dir/source/GameData.cpp.obj"
+  "C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameMasterData.cpp" "C:/Users/phaz/CLionProjects/NVWorldEdit/cmake-build-debug/CMakeFiles/NVWorldEdit.dir/source/GameMasterData.cpp.obj"
+  "C:/Users/phaz/CLionProjects/NVWorldEdit/source/main.cpp" "C:/Users/phaz/CLionProjects/NVWorldEdit/cmake-build-debug/CMakeFiles/NVWorldEdit.dir/source/main.cpp.obj"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

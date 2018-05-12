@@ -1,5 +1,7 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/NVWorldEdit.dir/main.cpp.obj"
+  "CMakeFiles/NVWorldEdit.dir/source/main.cpp.obj"
+  "CMakeFiles/NVWorldEdit.dir/source/GameData.cpp.obj"
+  "CMakeFiles/NVWorldEdit.dir/source/GameMasterData.cpp.obj"
   "NVWorldEdit.pdb"
   "NVWorldEdit.exe"
   "NVWorldEdit.exe.manifest"
