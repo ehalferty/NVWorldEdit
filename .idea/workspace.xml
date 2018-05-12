@@ -13,19 +13,6 @@
   <component name="ChangeListManager">
     <list default="true" id="61c5c767-f8d0-44e9-925e-c134685975bb" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/NVWorldEdit.dir/DependInfo.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/NVWorldEdit.dir/DependInfo.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/NVWorldEdit.dir/build.make" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/NVWorldEdit.dir/build.make" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/NVWorldEdit.dir/cmake_clean.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/NVWorldEdit.dir/cmake_clean.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/NVWorldEdit.dir/objects1.rsp" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/NVWorldEdit.dir/objects1.rsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/NVWorldEdit.cbp" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/NVWorldEdit.cbp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/GameData.cxx" beforeDir="false" afterPath="$PROJECT_DIR$/source/GameData.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/GameData.hxx" beforeDir="false" afterPath="$PROJECT_DIR$/source/GameData.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/GameMasterData.cxx" beforeDir="false" afterPath="$PROJECT_DIR$/source/GameMasterData.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/GameMasterData.hxx" beforeDir="false" afterPath="$PROJECT_DIR$/source/GameMasterData.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/main.cxx" beforeDir="false" afterPath="$PROJECT_DIR$/source/main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/main.hxx" beforeDir="false" afterPath="$PROJECT_DIR$/source/main.hpp" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -41,8 +28,8 @@
       <file leaf-file-name=".gitignore" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/.gitignore">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="153">
-              <caret line="9" column="19" selection-start-line="9" selection-start-column="19" selection-end-line="9" selection-end-column="19" />
+            <state relative-caret-position="187">
+              <caret line="11" lean-forward="true" selection-start-line="11" selection-end-line="11" />
             </state>
           </provider>
         </entry>
@@ -188,7 +175,7 @@
       <workItem from="1523339883894" duration="12399000" />
       <workItem from="1523477992823" duration="29197000" />
       <workItem from="1525868439064" duration="1287000" />
-      <workItem from="1525961835113" duration="33265000" />
+      <workItem from="1525961835113" duration="33326000" />
     </task>
     <task id="LOCAL-00001" summary="stuff">
       <created>1525991004509</created>
@@ -232,11 +219,18 @@
       <option name="project" value="LOCAL" />
       <updated>1526146232016</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="stuff">
+      <created>1526146429643</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1526146429643</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="76217000" />
+    <option name="totallyTimeSpent" value="76278000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1176" extended-state="6" />
@@ -554,8 +548,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="153">
-          <caret line="9" column="19" selection-start-line="9" selection-start-column="19" selection-end-line="9" selection-end-column="19" />
+        <state relative-caret-position="187">
+          <caret line="11" lean-forward="true" selection-start-line="11" selection-end-line="11" />
         </state>
       </provider>
     </entry>
