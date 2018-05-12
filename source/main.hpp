@@ -6,7 +6,13 @@
 #include <GL/glcorearb.h>
 #include <type_traits>
 
-// Constants and defines
+
+
+/*****************************************************************************/
+/*                                                                           */
+/*                           CONSTANTS AND DEFINES                           */
+/*                                                                           */
+/*****************************************************************************/
 LPCSTR CONST className = "NVWorldEdit";
 LPCSTR CONST windowTitle = "NVWorldEdit v0.0.1subalpha";
 DWORD CONST windowStyle = WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS |
@@ -42,7 +48,13 @@ TBBUTTON toolbarButtons[] = {
 };
 SIZE_T CONST toolbarButtonsLength = ARRAYLENGTH(toolbarButtons);
 
-// Variables
+
+
+/*****************************************************************************/
+/*                                                                           */
+/*                             GLOBAL VARIABLES                              */
+/*                                                                           */
+/*****************************************************************************/
 BOOL done = FALSE;
 HWND window = nullptr;
 HMENU menubar = nullptr;
@@ -57,7 +69,14 @@ UINT8 fileName[MAX_PATH] = "";
 UINT8 *masterFileContents = nullptr;
 UINT8 *modFileContents = nullptr;
 
-// Functions forward declarations
+
+
+/*****************************************************************************/
+/*                                                                           */
+/*                       FUNCTION FORWARD DECLARATIONS                       */
+/*                                                                           */
+/*****************************************************************************/
+
 void HandleFileOpenMaster();
 
 LONG WINAPI WindowMessageHandler(HWND, UINT, WPARAM, LPARAM);
