@@ -6,27 +6,27 @@
 
 #IncludeRegexTransform: 
 
-C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameData.cpp
-GameData.h
-C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameData.h
+C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameData.cxx
+GameData.hxx
+C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameData.hxx
 
-C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameData.h
+C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameData.hxx
 windows.h
 -
 
-C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameMasterData.cpp
-GameMasterData.h
-C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameMasterData.h
+C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameMasterData.cxx
+GameMasterData.hxx
+C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameMasterData.hxx
 
-C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameMasterData.h
-GameData.h
-C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameData.h
+C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameMasterData.hxx
+GameData.hxx
+C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameData.hxx
 
-C:/Users/phaz/CLionProjects/NVWorldEdit/source/main.cpp
-main.h
-C:/Users/phaz/CLionProjects/NVWorldEdit/source/main.h
+C:/Users/phaz/CLionProjects/NVWorldEdit/source/main.cxx
+main.hxx
+C:/Users/phaz/CLionProjects/NVWorldEdit/source/main.hxx
 
-C:/Users/phaz/CLionProjects/NVWorldEdit/source/main.h
+C:/Users/phaz/CLionProjects/NVWorldEdit/source/main.hxx
 windows.h
 -
 commctrl.h

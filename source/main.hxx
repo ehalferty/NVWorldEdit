@@ -11,7 +11,7 @@ LPCSTR CONST className = "NVWorldEdit";
 LPCSTR CONST windowTitle = "NVWorldEdit v0.0.1subalpha";
 DWORD CONST windowStyle = WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS |
                           WS_CLIPCHILDREN;
-POINT CONST windowSize = {640, 480};
+POINT CONST windowSize = { 640, 480 };
 enum class MenuItems {
   FILE_OPEN_MASTER,
   FILE_NEW_MOD,

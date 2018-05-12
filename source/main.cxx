@@ -1,8 +1,8 @@
-#include "main.h"
+#include "main.hxx"
 
 int WINAPI WinMain(HINSTANCE instance, HINSTANCE previousInstance,
                    LPTSTR commandLine, int commandShow) {
-  accelerators = CreateAcceleratorTable((LPACCEL) acceleratorsTable,
+  accelerators = CreateAcceleratorTable((LPACCEL)acceleratorsTable,
                                         acceleratorsTableLength);
   windowClass.style = CS_OWNDC;
   windowClass.lpfnWndProc = (WNDPROC)WindowMessageHandler;
@@ -28,7 +28,7 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE previousInstance,
       Sleep(50);
     }
   }
-  return (int) message.wParam;
+  return (int)message.wParam;
 }
 
 void HandleFileOpenMaster() {
@@ -40,7 +40,7 @@ void HandleFileOpenMaster() {
   openFileName.lStructSize = sizeof(openFileName);
   openFileName.hwndOwner = window;
   openFileName.lpstrFilter = "ESM Files (*.esm)\0*.esm\0All Files (*.*)\0*.*\0";
-  openFileName.lpstrFile = (LPSTR) fileName;
+  openFileName.lpstrFile = (LPSTR)fileName;
   openFileName.nMaxFile = MAX_PATH;
   openFileName.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST;
   openFileName.lpstrDefExt = "esm";
@@ -51,11 +51,11 @@ void HandleFileOpenMaster() {
                                    FILE_ATTRIBUTE_NORMAL, nullptr);
     LARGE_INTEGER fileSizeInBytes;
     BOOL getFileSizeResult = GetFileSizeEx(fileHandle, &fileSizeInBytes);
-    masterFileContents = (UINT8 *) HeapAlloc(GetProcessHeap(), 0,
-                                             (size_t) fileSizeInBytes.QuadPart);
+    masterFileContents = (UINT8 *)HeapAlloc(GetProcessHeap(), 0,
+                                            (size_t)fileSizeInBytes.QuadPart);
     DWORD numberOfBytesActuallyRead = 0;
     BOOL readFileResult = ReadFile(fileHandle, masterFileContents,
-                                   (size_t) fileSizeInBytes.QuadPart,
+                                   (size_t)fileSizeInBytes.QuadPart,
                                    &numberOfBytesActuallyRead, nullptr);
 //        BOOL foundCell = FALSE;
 //        while (!foundCell) {
@@ -64,40 +64,40 @@ void HandleFileOpenMaster() {
     // Find CELL
     HeapFree(GetProcessHeap(), 0, masterFileContents);
   }
-  EnableMenuItem(fileMenu, (INT) MenuItems::FILE_NEW_MOD, MF_ENABLED);
-  EnableMenuItem(fileMenu, (INT) MenuItems::FILE_OPEN_MOD, MF_ENABLED);
+  EnableMenuItem(fileMenu, (INT)MenuItems::FILE_NEW_MOD, MF_ENABLED);
+  EnableMenuItem(fileMenu, (INT)MenuItems::FILE_OPEN_MOD, MF_ENABLED);
 }
 
 VOID HandleCreateMessage(HWND window) {
   // Create menu bar
   menubar = CreateMenu();
   fileMenu = CreateMenu();
-  AppendMenu(fileMenu, MF_STRING, (INT) MenuItems::FILE_OPEN_MASTER,
+  AppendMenu(fileMenu, MF_STRING, (INT)MenuItems::FILE_OPEN_MASTER,
              "Open &Master...\tCtrl+M");
-  AppendMenu(fileMenu, MF_STRING | MF_GRAYED, (INT) MenuItems::FILE_NEW_MOD,
+  AppendMenu(fileMenu, MF_STRING | MF_GRAYED, (INT)MenuItems::FILE_NEW_MOD,
              "&New Mod...\tCtrl+N");
   AppendMenu(fileMenu, MF_STRING | MF_GRAYED,
-             (INT) MenuItems::FILE_OPEN_MOD, "&Open Mod...\tCtrl+O");
+             (INT)MenuItems::FILE_OPEN_MOD, "&Open Mod...\tCtrl+O");
   AppendMenu(fileMenu, MF_SEPARATOR, 0, "-");
   AppendMenu(fileMenu, MF_STRING | MF_GRAYED,
-             (INT) MenuItems::FILE_SAVE_MOD, "&Save Mod...\tCtrl+S");
+             (INT)MenuItems::FILE_SAVE_MOD, "&Save Mod...\tCtrl+S");
   AppendMenu(fileMenu, MF_SEPARATOR, 0, "-");
-  AppendMenu(fileMenu, MF_STRING, (INT) MenuItems::FILE_EXIT,
+  AppendMenu(fileMenu, MF_STRING, (INT)MenuItems::FILE_EXIT,
              "E&xit\tCtrl-Q");
-  AppendMenu(menubar, MF_POPUP, (UINT_PTR) fileMenu, "&File");
+  AppendMenu(menubar, MF_POPUP, (UINT_PTR)fileMenu, "&File");
   SetMenu(window, menubar);
   // Create toolbar
   toolbar = CreateWindowEx(0, TOOLBARCLASSNAME, nullptr,
                            WS_CHILD | TBSTYLE_WRAPABLE, 0, 0, 0, 0, window,
                            nullptr, nullptr, nullptr);
   toolbarImageList = ImageList_Create(16, 16, ILC_COLOR16 | ILC_MASK, 3, 0);
-  SendMessage(toolbar, TB_SETIMAGELIST, (WPARAM) 0,
-              (LPARAM) toolbarImageList);
-  SendMessage(toolbar, TB_LOADIMAGES, (WPARAM) IDB_STD_SMALL_COLOR,
-              (LPARAM) HINST_COMMCTRL);
-  SendMessage(toolbar, TB_BUTTONSTRUCTSIZE, (WPARAM) sizeof(TBBUTTON), 0);
-  SendMessage(toolbar, TB_ADDBUTTONS, (WPARAM) toolbarButtonsLength,
-              (LPARAM) &toolbarButtons);
+  SendMessage(toolbar, TB_SETIMAGELIST, (WPARAM)0,
+              (LPARAM)toolbarImageList);
+  SendMessage(toolbar, TB_LOADIMAGES, (WPARAM)IDB_STD_SMALL_COLOR,
+              (LPARAM)HINST_COMMCTRL);
+  SendMessage(toolbar, TB_BUTTONSTRUCTSIZE, (WPARAM)sizeof(TBBUTTON), 0);
+  SendMessage(toolbar, TB_ADDBUTTONS, (WPARAM)toolbarButtonsLength,
+              (LPARAM)&toolbarButtons);
   SendMessage(toolbar, TB_AUTOSIZE, 0, 0);
   ShowWindow(toolbar, TRUE);
 }
@@ -111,19 +111,19 @@ LONG WINAPI WindowMessageHandler(HWND window, UINT message, WPARAM wParam,
       break;
     case WM_COMMAND:
       switch (LOWORD(wParam)) {
-        case (INT) MenuItems::FILE_OPEN_MASTER:
+        case (INT)MenuItems::FILE_OPEN_MASTER:
           HandleFileOpenMaster();
           break;
-        case (INT) MenuItems::FILE_NEW_MOD:
+        case (INT)MenuItems::FILE_NEW_MOD:
           MessageBox(nullptr, "New mod...", "", MB_OK);
           break;
-        case (INT) MenuItems::FILE_OPEN_MOD:
+        case (INT)MenuItems::FILE_OPEN_MOD:
           MessageBox(nullptr, "Open mod...", "", MB_OK);
           break;
-        case (INT) MenuItems::FILE_SAVE_MOD:
+        case (INT)MenuItems::FILE_SAVE_MOD:
           MessageBox(nullptr, "Save mod...", "", MB_OK);
           break;
-        case (INT) MenuItems::FILE_EXIT:
+        case (INT)MenuItems::FILE_EXIT:
           PostQuitMessage(0);
           break;
         default:
@@ -138,6 +138,6 @@ LONG WINAPI WindowMessageHandler(HWND window, UINT message, WPARAM wParam,
       PostQuitMessage(0);
       break;
     default:
-      return (LONG) DefWindowProc(window, message, wParam, lParam);
+      return (LONG)DefWindowProc(window, message, wParam, lParam);
   }
 }

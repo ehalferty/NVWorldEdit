@@ -80,22 +80,22 @@
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameData.cpp">
+		<Unit filename="C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameData.cxx">
 			<Option target="NVWorldEdit"/>
 		</Unit>
-		<Unit filename="C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameData.h">
+		<Unit filename="C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameData.hxx">
 			<Option target="NVWorldEdit"/>
 		</Unit>
-		<Unit filename="C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameMasterData.cpp">
+		<Unit filename="C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameMasterData.cxx">
 			<Option target="NVWorldEdit"/>
 		</Unit>
-		<Unit filename="C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameMasterData.h">
+		<Unit filename="C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameMasterData.hxx">
 			<Option target="NVWorldEdit"/>
 		</Unit>
-		<Unit filename="C:/Users/phaz/CLionProjects/NVWorldEdit/source/main.cpp">
+		<Unit filename="C:/Users/phaz/CLionProjects/NVWorldEdit/source/main.cxx">
 			<Option target="NVWorldEdit"/>
 		</Unit>
-		<Unit filename="C:/Users/phaz/CLionProjects/NVWorldEdit/source/main.h">
+		<Unit filename="C:/Users/phaz/CLionProjects/NVWorldEdit/source/main.hxx">
 			<Option target="NVWorldEdit"/>
 		</Unit>
 		<Unit filename="C:/Users/phaz/CLionProjects/NVWorldEdit/CMakeLists.txt">
