@@ -1,0 +1,40 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameData.cpp
+GameData.h
+C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameData.h
+
+C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameData.h
+windows.h
+-
+
+C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameMasterData.cpp
+GameMasterData.h
+C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameMasterData.h
+
+C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameMasterData.h
+GameData.h
+C:/Users/phaz/CLionProjects/NVWorldEdit/source/GameData.h
+
+C:/Users/phaz/CLionProjects/NVWorldEdit/source/main.cpp
+main.h
+C:/Users/phaz/CLionProjects/NVWorldEdit/source/main.h
+
+C:/Users/phaz/CLionProjects/NVWorldEdit/source/main.h
+windows.h
+-
+commctrl.h
+-
+GL/gl.h
+-
+GL/glcorearb.h
+-
+type_traits
+-
+
