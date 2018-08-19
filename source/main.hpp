@@ -5,6 +5,7 @@
 #include <GL/gl.h>
 #include <GL/glcorearb.h>
 #include <type_traits>
+#include "sys/Sys.hpp"
 
 
 
@@ -14,9 +15,9 @@
 /*                                                                           */
 /*****************************************************************************/
 LPCSTR CONST className = "NVWorldEdit";
-LPCSTR CONST windowTitle = "NVWorldEdit v0.0.1subalpha";
-DWORD CONST windowStyle = WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS |
-                          WS_CLIPCHILDREN;
+LPCSTR CONST windowTitle = "NVWorldEdit v0.0.2subalpha";
+DWORD CONST windowStyle = Sys::WS::OVERLAPPEDWINDOW | Sys::WS::CLIPSIBLINGS |
+        Sys::WS::CLIPCHILDREN;
 POINT CONST windowSize = { 640, 480 };
 enum class MenuItems {
   FILE_OPEN_MASTER,
@@ -41,8 +42,8 @@ SIZE_T CONST acceleratorsTableLength = ARRAYLENGTH(acceleratorsTable);
 (INT)MenuItems::MENUITEM,  TBSTATE_##STYLE, BTNS_AUTOSIZE, { 0 }, 0, \
 (INT_PTR)(TEXT) }
 TBBUTTON toolbarButtons[] = {
-    TOOLBARBUTTON(STD_FILENEW, FILE_OPEN_MASTER, ENABLED, "Open Master"),
-    TOOLBARBUTTON(STD_FILEOPEN, FILE_NEW_MOD, DISABLED, "New Mod"),
+    TOOLBARBUTTON(STD_FILEOPEN, FILE_OPEN_MASTER, ENABLED, "Open Master"),
+    TOOLBARBUTTON(STD_FILENEW, FILE_NEW_MOD, DISABLED, "New Mod"),
     TOOLBARBUTTON(STD_FILEOPEN, FILE_OPEN_MOD, DISABLED, "Open Mod"),
     TOOLBARBUTTON(STD_FILESAVE, FILE_SAVE_MOD, DISABLED, "Save Mod")
 };

@@ -1,6 +1,6 @@
 #include "main.hpp"
 
-int WINAPI WinMain(HINSTANCE instance, HINSTANCE previousInstance,
+INT WINAPI WinMain(HINSTANCE instance, HINSTANCE previousInstance,
                    LPTSTR commandLine, int commandShow) {
   accelerators = CreateAcceleratorTable((LPACCEL)acceleratorsTable,
                                         acceleratorsTableLength);
@@ -31,7 +31,7 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE previousInstance,
   return (int)message.wParam;
 }
 
-void HandleFileOpenMaster() {
+VOID HandleFileOpenMaster() {
   // TODO: Guess where NV is https://gamedev.stackexchange.com/q/124100
   // TODO: Expand this to a custom modal dialog which has you find a folder and
   // TODO:   then lists all ESMs and stores stuff in registry.
@@ -42,7 +42,8 @@ void HandleFileOpenMaster() {
   openFileName.lpstrFilter = "ESM Files (*.esm)\0*.esm\0All Files (*.*)\0*.*\0";
   openFileName.lpstrFile = (LPSTR)fileName;
   openFileName.nMaxFile = MAX_PATH;
-  openFileName.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST;
+  openFileName.Flags = Sys::OFN::EXPLORER |
+          Sys::OFN::FILEMUSTEXIST;
   openFileName.lpstrDefExt = "esm";
   int getFileOpenNameResult = GetOpenFileName(&openFileName);
   if (getFileOpenNameResult) {
@@ -55,7 +56,7 @@ void HandleFileOpenMaster() {
                                             (size_t)fileSizeInBytes.QuadPart);
     DWORD numberOfBytesActuallyRead = 0;
     BOOL readFileResult = ReadFile(fileHandle, masterFileContents,
-                                   (size_t)fileSizeInBytes.QuadPart,
+                                   (DWORD)fileSizeInBytes.QuadPart,
                                    &numberOfBytesActuallyRead, nullptr);
 //        BOOL foundCell = FALSE;
 //        while (!foundCell) {
@@ -68,28 +69,30 @@ void HandleFileOpenMaster() {
   EnableMenuItem(fileMenu, (INT)MenuItems::FILE_OPEN_MOD, MF_ENABLED);
 }
 
-VOID HandleCreateMessage(HWND window) {
-  // Create menu bar
+VOID DoInitialMenuBarSetup(HWND window) {
   menubar = CreateMenu();
   fileMenu = CreateMenu();
-  AppendMenu(fileMenu, MF_STRING, (INT)MenuItems::FILE_OPEN_MASTER,
+  AppendMenu(fileMenu, Sys::MF::STRING, (INT)MenuItems::FILE_OPEN_MASTER,
              "Open &Master...\tCtrl+M");
-  AppendMenu(fileMenu, MF_STRING | MF_GRAYED, (INT)MenuItems::FILE_NEW_MOD,
+  AppendMenu(fileMenu, Sys::MF::STRING | Sys::MF::GRAYED, (INT)MenuItems::FILE_NEW_MOD,
              "&New Mod...\tCtrl+N");
-  AppendMenu(fileMenu, MF_STRING | MF_GRAYED,
+  AppendMenu(fileMenu, Sys::MF::STRING | Sys::MF::GRAYED,
              (INT)MenuItems::FILE_OPEN_MOD, "&Open Mod...\tCtrl+O");
-  AppendMenu(fileMenu, MF_SEPARATOR, 0, "-");
-  AppendMenu(fileMenu, MF_STRING | MF_GRAYED,
+  AppendMenu(fileMenu, Sys::MF::SEPARATOR, 0, "-");
+  AppendMenu(fileMenu, Sys::MF::STRING | Sys::MF::GRAYED,
              (INT)MenuItems::FILE_SAVE_MOD, "&Save Mod...\tCtrl+S");
-  AppendMenu(fileMenu, MF_SEPARATOR, 0, "-");
-  AppendMenu(fileMenu, MF_STRING, (INT)MenuItems::FILE_EXIT,
+  AppendMenu(fileMenu, Sys::MF::SEPARATOR, 0, "-");
+  AppendMenu(fileMenu, Sys::MF::STRING, (INT)MenuItems::FILE_EXIT,
              "E&xit\tCtrl-Q");
-  AppendMenu(menubar, MF_POPUP, (UINT_PTR)fileMenu, "&File");
+  AppendMenu(menubar, Sys::MF::POPUP, (UINT_PTR)fileMenu, "&File");
   SetMenu(window, menubar);
-  // Create toolbar
+}
+
+VOID DoInitialToolbarSetup(HWND window) {
   toolbar = CreateWindowEx(0, TOOLBARCLASSNAME, nullptr,
-                           WS_CHILD | TBSTYLE_WRAPABLE, 0, 0, 0, 0, window,
-                           nullptr, nullptr, nullptr);
+                           Sys::WS::CHILD |
+                           Sys::TBSTYLE::WRAPABLE, 0, 0, 0, 0,
+                           window, nullptr, nullptr, nullptr);
   toolbarImageList = ImageList_Create(16, 16, ILC_COLOR16 | ILC_MASK, 3, 0);
   SendMessage(toolbar, TB_SETIMAGELIST, (WPARAM)0,
               (LPARAM)toolbarImageList);
@@ -102,6 +105,11 @@ VOID HandleCreateMessage(HWND window) {
   ShowWindow(toolbar, TRUE);
 }
 
+VOID HandleCreateMessage(HWND window) {
+  DoInitialMenuBarSetup(window);
+  DoInitialToolbarSetup(window);
+}
+
 LONG WINAPI WindowMessageHandler(HWND window, UINT message, WPARAM wParam,
                                  LPARAM lParam) {
   static PAINTSTRUCT paintStruct;
@@ -110,7 +118,7 @@ LONG WINAPI WindowMessageHandler(HWND window, UINT message, WPARAM wParam,
       HandleCreateMessage(window);
       break;
     case WM_COMMAND:
-      switch (LOWORD(wParam)) {
+      switch (wParam & 0xFFFFU) {
         case (INT)MenuItems::FILE_OPEN_MASTER:
           HandleFileOpenMaster();
           break;
@@ -138,6 +146,7 @@ LONG WINAPI WindowMessageHandler(HWND window, UINT message, WPARAM wParam,
       PostQuitMessage(0);
       break;
     default:
-      return (LONG)DefWindowProc(window, message, wParam, lParam);
+      break;
   }
+  return (LONG)DefWindowProc(window, message, wParam, lParam);
 }
