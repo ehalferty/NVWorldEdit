@@ -3,5 +3,5 @@ project(NVWorldEdit CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(NVWorldEdit source/main.cpp source/main.hpp source/GameData.cpp source/GameData.hpp source/GameMasterData.cpp source/GameMasterData.hpp source/sys/Sys.hpp source/Win32Macros.hpp)
+add_executable(NVWorldEdit source/main.cpp source/main.hpp source/GameData.cpp source/GameData.hpp source/GameMasterData.cpp source/GameMasterData.hpp source/sys/Sys.hpp)
 target_link_libraries(NVWorldEdit "-lwinmm -lopengl32 -lgdi32 -lkernel32 -lComctl32")

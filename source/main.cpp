@@ -74,8 +74,8 @@ VOID DoInitialMenuBarSetup(HWND window) {
   fileMenu = CreateMenu();
   AppendMenu(fileMenu, Sys::MF::STRING, (INT)MenuItems::FILE_OPEN_MASTER,
              "Open &Master...\tCtrl+M");
-  AppendMenu(fileMenu, Sys::MF::STRING | Sys::MF::GRAYED, (INT)MenuItems::FILE_NEW_MOD,
-             "&New Mod...\tCtrl+N");
+  AppendMenu(fileMenu, Sys::MF::STRING | Sys::MF::GRAYED,
+          (INT)MenuItems::FILE_NEW_MOD, "&New Mod...\tCtrl+N");
   AppendMenu(fileMenu, Sys::MF::STRING | Sys::MF::GRAYED,
              (INT)MenuItems::FILE_OPEN_MOD, "&Open Mod...\tCtrl+O");
   AppendMenu(fileMenu, Sys::MF::SEPARATOR, 0, "-");
@@ -93,7 +93,8 @@ VOID DoInitialToolbarSetup(HWND window) {
                            Sys::WS::CHILD |
                            Sys::TBSTYLE::WRAPABLE, 0, 0, 0, 0,
                            window, nullptr, nullptr, nullptr);
-  toolbarImageList = ImageList_Create(16, 16, ILC_COLOR16 | ILC_MASK, 3, 0);
+  toolbarImageList = ImageList_Create(16, 16,
+          Sys::ILC::COLOR16 | Sys::ILC::MASK, 3, 0);
   SendMessage(toolbar, TB_SETIMAGELIST, (WPARAM)0,
               (LPARAM)toolbarImageList);
   SendMessage(toolbar, TB_LOADIMAGES, (WPARAM)IDB_STD_SMALL_COLOR,
