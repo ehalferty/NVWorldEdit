@@ -38,7 +38,7 @@ ACCEL CONST acceleratorsTable[] = {
 #define ARRAYLENGTH(ARRAY) std::extent<decltype(ARRAY)>::value;
 SIZE_T CONST acceleratorsTableLength = ARRAYLENGTH(acceleratorsTable);
 #define TBSTATE_DISABLED 0
-#define TOOLBARBUTTON(ICON, MENUITEM, STYLE, TEXT) { MAKELONG(ICON, 0), \
+#define TOOLBARBUTTON(ICON, MENUITEM, STYLE, TEXT) { ICON, \
 (INT)MenuItems::MENUITEM,  TBSTATE_##STYLE, BTNS_AUTOSIZE, { 0 }, 0, \
 (INT_PTR)(TEXT) }
 TBBUTTON toolbarButtons[] = {
